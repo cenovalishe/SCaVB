@@ -397,7 +397,7 @@ function animateWheel() {
             animationFrame = requestAnimationFrame(animate);
         } else {
             // Animation complete
-            state.isSpinning = false;
+            // state.isSpinning = false; // <--- УДАЛИТЕ ИЛИ ЗАКОММЕНТИРУЙТЕ ЭТУ СТРОКУ
             document.querySelector('.wheel-frame').classList.remove('spinning');
             onSpinComplete();
         }
@@ -425,7 +425,10 @@ async function onSpinComplete() {
         elements.currentGameDisplay.textContent = result.name;
         elements.spinBtn.style.display = 'none';
         elements.gameStatusPanel.style.display = 'block';
+        
+        state.isSpinning = false; // <--- ДОБАВЛЕНО: Разблокируем здесь
         updateRerollButton();
+        
     } else if (state.isAutoMode) {
         // Auto-advance to next stage
         setTimeout(() => {
@@ -437,6 +440,9 @@ async function onSpinComplete() {
             updateStageUI();
             loadStageData();
             elements.resultDisplay.style.display = 'none';
+            
+            state.isSpinning = false; // <--- ДОБАВЛЕНО: Разблокируем только ПОСЛЕ смены этапа
+            updateSpinButton();       // <--- Обновляем состояние кнопки
         }, 2000);
     } else {
         // Manual mode: clear wheel after event/item
@@ -445,6 +451,9 @@ async function onSpinComplete() {
             state.currentSegments = [];
             updateLegend([]);
             elements.resultDisplay.style.display = 'none';
+            updateSpinButton();
+            
+            state.isSpinning = false; // <--- ДОБАВЛЕНО: Разблокируем для ручного режима
             updateSpinButton();
         }, 2000);
     }
