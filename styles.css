@@ -55,7 +55,7 @@
 
 /* Base */
 html {
-    font-size: 14px;
+    font-size: 21px;
 }
 
 body {
@@ -169,13 +169,13 @@ body {
     position: fixed;
     left: 0;
     right: 0;
-    height: 24px;
+    height: 36px;
     background: var(--bg-dark);
     border-bottom: 1px solid var(--bg-light);
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 0 80px;
+    padding: 0 100px;
     z-index: 200;
     font-size: 0.75rem;
     letter-spacing: 0.1em;
@@ -252,8 +252,8 @@ body {
     min-height: 100vh;
     display: flex;
     flex-direction: column;
-    padding: 32px 12px 32px;
-    max-width: 1600px;
+    padding: 48px 20px 48px;
+    max-width: 1920px;
     margin: 0 auto;
 }
 
@@ -597,8 +597,8 @@ body {
 
 .game-area {
     display: grid;
-    grid-template-columns: 220px 1fr 240px;
-    gap: 12px;
+    grid-template-columns: 320px 1fr 340px;
+    gap: 20px;
     flex: 1;
     min-height: 0;
 }
@@ -908,22 +908,22 @@ body {
 
 .wheel-frame {
     position: relative;
-    width: 460px;
-    height: 460px;
+    width: 660px;
+    height: 660px;
     display: flex;
     align-items: center;
     justify-content: center;
     background: var(--bg-medium);
-    border: 2px solid var(--bg-light);
+    border: 3px solid var(--bg-light);
 }
 
 /* Corner bolts */
 .wheel-bolt {
     position: absolute;
-    width: 16px;
-    height: 16px;
+    width: 24px;
+    height: 24px;
     background: var(--bg-lighter);
-    border: 2px solid var(--primary-dark);
+    border: 3px solid var(--primary-dark);
     border-radius: 50%;
     z-index: 10;
 }
@@ -934,14 +934,14 @@ body {
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    font-size: 10px;
+    font-size: 14px;
     color: var(--text-dim);
 }
 
-.wheel-bolt.top-left { top: 8px; left: 8px; }
-.wheel-bolt.top-right { top: 8px; right: 8px; }
-.wheel-bolt.bottom-left { bottom: 8px; left: 8px; }
-.wheel-bolt.bottom-right { bottom: 8px; right: 8px; }
+.wheel-bolt.top-left { top: 12px; left: 12px; }
+.wheel-bolt.top-right { top: 12px; right: 12px; }
+.wheel-bolt.bottom-left { bottom: 12px; left: 12px; }
+.wheel-bolt.bottom-right { bottom: 12px; right: 12px; }
 
 /* Tech lines */
 .tech-line {
@@ -974,21 +974,21 @@ body {
 }
 
 .wheel-ring.outer {
-    width: 440px;
-    height: 440px;
+    width: 640px;
+    height: 640px;
     border-color: var(--bg-lighter);
 }
 
 .wheel-ring.middle {
-    width: 430px;
-    height: 430px;
+    width: 625px;
+    height: 625px;
     border-color: var(--primary-dark);
     opacity: 0.5;
 }
 
 .wheel-ring.inner {
-    width: 100px;
-    height: 100px;
+    width: 140px;
+    height: 140px;
     border-color: var(--primary-dark);
 }
 
@@ -1013,26 +1013,26 @@ body {
 
 .pointer-housing {
     position: relative;
-    padding: 4px 8px;
+    padding: 6px 12px;
     background: var(--bg-lighter);
-    border: 2px solid var(--primary);
+    border: 3px solid var(--primary);
 }
 
 .pointer-arrow {
     width: 0;
     height: 0;
-    border-left: 12px solid transparent;
-    border-right: 12px solid transparent;
-    border-top: 20px solid var(--primary);
+    border-left: 18px solid transparent;
+    border-right: 18px solid transparent;
+    border-top: 30px solid var(--primary);
 }
 
 .pointer-light {
     position: absolute;
-    top: -2px;
+    top: -3px;
     left: 50%;
     transform: translateX(-50%);
-    width: 6px;
-    height: 6px;
+    width: 10px;
+    height: 10px;
     background: var(--status-green);
     border-radius: 50%;
     animation: indicatorBlink 1.5s infinite;
@@ -1057,21 +1057,21 @@ body {
 }
 
 .center-ring.outer {
-    width: 70px;
-    height: 70px;
+    width: 100px;
+    height: 100px;
     background: var(--bg-medium);
 }
 
 .center-ring.inner {
-    width: 56px;
-    height: 56px;
+    width: 80px;
+    height: 80px;
     background: var(--bg-dark);
 }
 
 .center-logo {
     position: relative;
-    width: 70px;
-    height: 70px;
+    width: 100px;
+    height: 100px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -1079,7 +1079,7 @@ body {
 
 .logo-text {
     font-family: var(--font-main);
-    font-size: 1rem;
+    font-size: 1.2rem;
     color: var(--text-secondary);
     letter-spacing: 0.1em;
 }
@@ -1087,8 +1087,8 @@ body {
 /* LED Ring */
 .led-ring {
     position: absolute;
-    width: 450px;
-    height: 450px;
+    width: 650px;
+    height: 650px;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
@@ -1097,28 +1097,28 @@ body {
 
 .led {
     position: absolute;
-    width: 6px;
-    height: 6px;
+    width: 10px;
+    height: 10px;
     background: var(--bg-lighter);
-    border: 1px solid var(--primary-dark);
+    border: 2px solid var(--primary-dark);
     border-radius: 50%;
     top: 50%;
     left: 50%;
     transform-origin: 0 0;
 }
 
-.led:nth-child(1) { transform: rotate(0deg) translateX(225px) translateY(-3px); }
-.led:nth-child(2) { transform: rotate(30deg) translateX(225px) translateY(-3px); }
-.led:nth-child(3) { transform: rotate(60deg) translateX(225px) translateY(-3px); }
-.led:nth-child(4) { transform: rotate(90deg) translateX(225px) translateY(-3px); }
-.led:nth-child(5) { transform: rotate(120deg) translateX(225px) translateY(-3px); }
-.led:nth-child(6) { transform: rotate(150deg) translateX(225px) translateY(-3px); }
-.led:nth-child(7) { transform: rotate(180deg) translateX(225px) translateY(-3px); }
-.led:nth-child(8) { transform: rotate(210deg) translateX(225px) translateY(-3px); }
-.led:nth-child(9) { transform: rotate(240deg) translateX(225px) translateY(-3px); }
-.led:nth-child(10) { transform: rotate(270deg) translateX(225px) translateY(-3px); }
-.led:nth-child(11) { transform: rotate(300deg) translateX(225px) translateY(-3px); }
-.led:nth-child(12) { transform: rotate(330deg) translateX(225px) translateY(-3px); }
+.led:nth-child(1) { transform: rotate(0deg) translateX(325px) translateY(-5px); }
+.led:nth-child(2) { transform: rotate(30deg) translateX(325px) translateY(-5px); }
+.led:nth-child(3) { transform: rotate(60deg) translateX(325px) translateY(-5px); }
+.led:nth-child(4) { transform: rotate(90deg) translateX(325px) translateY(-5px); }
+.led:nth-child(5) { transform: rotate(120deg) translateX(325px) translateY(-5px); }
+.led:nth-child(6) { transform: rotate(150deg) translateX(325px) translateY(-5px); }
+.led:nth-child(7) { transform: rotate(180deg) translateX(325px) translateY(-5px); }
+.led:nth-child(8) { transform: rotate(210deg) translateX(325px) translateY(-5px); }
+.led:nth-child(9) { transform: rotate(240deg) translateX(325px) translateY(-5px); }
+.led:nth-child(10) { transform: rotate(270deg) translateX(325px) translateY(-5px); }
+.led:nth-child(11) { transform: rotate(300deg) translateX(325px) translateY(-5px); }
+.led:nth-child(12) { transform: rotate(330deg) translateX(325px) translateY(-5px); }
 
 /* LED animation for spinning */
 .wheel-frame.spinning .led {
@@ -1558,10 +1558,10 @@ body {
    RESPONSIVE
    ========================================== */
 
-@media (max-width: 1200px) {
+@media (max-width: 1400px) {
     .game-area {
         grid-template-columns: 1fr;
-        gap: 10px;
+        gap: 15px;
     }
 
     .wheel-section {
@@ -1581,40 +1581,40 @@ body {
     }
 
     .wheel-frame {
-        width: 400px;
-        height: 400px;
+        width: 560px;
+        height: 560px;
     }
 
     #wheelCanvas {
-        width: 360px;
-        height: 360px;
+        width: 500px;
+        height: 500px;
     }
 
-    .wheel-ring.outer { width: 380px; height: 380px; }
-    .wheel-ring.middle { width: 370px; height: 370px; }
+    .wheel-ring.outer { width: 540px; height: 540px; }
+    .wheel-ring.middle { width: 525px; height: 525px; }
 
     .led-ring {
-        width: 390px;
-        height: 390px;
+        width: 550px;
+        height: 550px;
     }
 
-    .led:nth-child(1) { transform: rotate(0deg) translateX(195px) translateY(-3px); }
-    .led:nth-child(2) { transform: rotate(30deg) translateX(195px) translateY(-3px); }
-    .led:nth-child(3) { transform: rotate(60deg) translateX(195px) translateY(-3px); }
-    .led:nth-child(4) { transform: rotate(90deg) translateX(195px) translateY(-3px); }
-    .led:nth-child(5) { transform: rotate(120deg) translateX(195px) translateY(-3px); }
-    .led:nth-child(6) { transform: rotate(150deg) translateX(195px) translateY(-3px); }
-    .led:nth-child(7) { transform: rotate(180deg) translateX(195px) translateY(-3px); }
-    .led:nth-child(8) { transform: rotate(210deg) translateX(195px) translateY(-3px); }
-    .led:nth-child(9) { transform: rotate(240deg) translateX(195px) translateY(-3px); }
-    .led:nth-child(10) { transform: rotate(270deg) translateX(195px) translateY(-3px); }
-    .led:nth-child(11) { transform: rotate(300deg) translateX(195px) translateY(-3px); }
-    .led:nth-child(12) { transform: rotate(330deg) translateX(195px) translateY(-3px); }
+    .led:nth-child(1) { transform: rotate(0deg) translateX(275px) translateY(-5px); }
+    .led:nth-child(2) { transform: rotate(30deg) translateX(275px) translateY(-5px); }
+    .led:nth-child(3) { transform: rotate(60deg) translateX(275px) translateY(-5px); }
+    .led:nth-child(4) { transform: rotate(90deg) translateX(275px) translateY(-5px); }
+    .led:nth-child(5) { transform: rotate(120deg) translateX(275px) translateY(-5px); }
+    .led:nth-child(6) { transform: rotate(150deg) translateX(275px) translateY(-5px); }
+    .led:nth-child(7) { transform: rotate(180deg) translateX(275px) translateY(-5px); }
+    .led:nth-child(8) { transform: rotate(210deg) translateX(275px) translateY(-5px); }
+    .led:nth-child(9) { transform: rotate(240deg) translateX(275px) translateY(-5px); }
+    .led:nth-child(10) { transform: rotate(270deg) translateX(275px) translateY(-5px); }
+    .led:nth-child(11) { transform: rotate(300deg) translateX(275px) translateY(-5px); }
+    .led:nth-child(12) { transform: rotate(330deg) translateX(275px) translateY(-5px); }
 }
 
 @media (max-width: 768px) {
     html {
-        font-size: 12px;
+        font-size: 16px;
     }
 
     .main-title {
@@ -1623,40 +1623,40 @@ body {
     }
 
     .wheel-frame {
-        width: 320px;
-        height: 320px;
+        width: 420px;
+        height: 420px;
     }
 
     #wheelCanvas {
-        width: 280px;
-        height: 280px;
+        width: 380px;
+        height: 380px;
     }
 
-    .wheel-ring.outer { width: 300px; height: 300px; }
-    .wheel-ring.middle { width: 290px; height: 290px; }
-    .wheel-ring.inner { width: 80px; height: 80px; }
+    .wheel-ring.outer { width: 400px; height: 400px; }
+    .wheel-ring.middle { width: 390px; height: 390px; }
+    .wheel-ring.inner { width: 100px; height: 100px; }
 
     .led-ring {
-        width: 310px;
-        height: 310px;
+        width: 410px;
+        height: 410px;
     }
 
-    .led:nth-child(1) { transform: rotate(0deg) translateX(155px) translateY(-3px); }
-    .led:nth-child(2) { transform: rotate(30deg) translateX(155px) translateY(-3px); }
-    .led:nth-child(3) { transform: rotate(60deg) translateX(155px) translateY(-3px); }
-    .led:nth-child(4) { transform: rotate(90deg) translateX(155px) translateY(-3px); }
-    .led:nth-child(5) { transform: rotate(120deg) translateX(155px) translateY(-3px); }
-    .led:nth-child(6) { transform: rotate(150deg) translateX(155px) translateY(-3px); }
-    .led:nth-child(7) { transform: rotate(180deg) translateX(155px) translateY(-3px); }
-    .led:nth-child(8) { transform: rotate(210deg) translateX(155px) translateY(-3px); }
-    .led:nth-child(9) { transform: rotate(240deg) translateX(155px) translateY(-3px); }
-    .led:nth-child(10) { transform: rotate(270deg) translateX(155px) translateY(-3px); }
-    .led:nth-child(11) { transform: rotate(300deg) translateX(155px) translateY(-3px); }
-    .led:nth-child(12) { transform: rotate(330deg) translateX(155px) translateY(-3px); }
+    .led:nth-child(1) { transform: rotate(0deg) translateX(205px) translateY(-5px); }
+    .led:nth-child(2) { transform: rotate(30deg) translateX(205px) translateY(-5px); }
+    .led:nth-child(3) { transform: rotate(60deg) translateX(205px) translateY(-5px); }
+    .led:nth-child(4) { transform: rotate(90deg) translateX(205px) translateY(-5px); }
+    .led:nth-child(5) { transform: rotate(120deg) translateX(205px) translateY(-5px); }
+    .led:nth-child(6) { transform: rotate(150deg) translateX(205px) translateY(-5px); }
+    .led:nth-child(7) { transform: rotate(180deg) translateX(205px) translateY(-5px); }
+    .led:nth-child(8) { transform: rotate(210deg) translateX(205px) translateY(-5px); }
+    .led:nth-child(9) { transform: rotate(240deg) translateX(205px) translateY(-5px); }
+    .led:nth-child(10) { transform: rotate(270deg) translateX(205px) translateY(-5px); }
+    .led:nth-child(11) { transform: rotate(300deg) translateX(205px) translateY(-5px); }
+    .led:nth-child(12) { transform: rotate(330deg) translateX(205px) translateY(-5px); }
 
     .controls-row {
         flex-direction: column;
-        gap: 10px;
+        gap: 15px;
     }
 
     .stage-buttons {
@@ -1665,17 +1665,17 @@ body {
     }
 
     .player-buttons {
-        gap: 4px;
+        gap: 6px;
     }
 
     .player-btn {
-        padding: 6px 10px;
-        font-size: 0.7rem;
+        padding: 10px 16px;
+        font-size: 0.8rem;
     }
 
     .status-bar {
-        padding: 0 20px;
-        font-size: 0.65rem;
+        padding: 0 30px;
+        font-size: 0.7rem;
     }
 
     .corner-decor {
