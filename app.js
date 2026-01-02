@@ -651,12 +651,26 @@ function updateLegend(segments) {
     const totalWeight = segments.reduce((sum, s) => sum + s.weight, 0);
     const colors = generateColors(segments.length);
 
+    // 1. Создаем временный массив объектов, связывая сегмент с его цветом
+    // Это нужно, чтобы при сортировке цвета не перепутались и совпадали с колесом
+    const sortedData = segments.map((segment, index) => ({
+        segment: segment,
+        color: colors[index]
+    }));
+
+    // 2. Сортируем этот массив по весу (weight) от большего к меньшему
+    sortedData.sort((a, b) => b.segment.weight - a.segment.weight);
+
     let html = '';
-    segments.forEach((segment, index) => {
+    // 3. Выводим уже отсортированные данные
+    sortedData.forEach((item) => {
+        const segment = item.segment;
+        const color = item.color; // Используем сохраненный цвет
         const chance = ((segment.weight / totalWeight) * 100).toFixed(1);
+        
         html += `
             <div class="legend-item">
-                <span class="legend-color" style="background: ${colors[index]}"></span>
+                <span class="legend-color" style="background: ${color}"></span>
                 <span class="legend-name" title="${segment.name}">${segment.name}</span>
                 <span class="legend-chance">${chance}%</span>
             </div>
