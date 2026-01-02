@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Survival Randomizer</title>
+    <style>
+        /* --- FNAF / RETRO HORROR STYLES --- */
+        body {
+            background-color: #050505;
+            color: #33ff00;
+            font-family: 'Courier New', Courier, monospace;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            overflow: hidden;
+            text-transform: uppercase;
+            text-shadow: 0 0 5px #33ff00;
+        }
+
+        /* Эффект старого монитора (Scanlines) */
+        body::before {
+            content: " ";
+            display: block;
+            position: absolute;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            right: 0;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+            z-index: 10;
+            background-size: 100% 2px, 3px 100%;
+            pointer-events: none;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            letter-spacing: 5px;
+            animation: flicker 3s infinite;
+        }
+
+        .container {
+            position: relative;
+            z-index: 5;
+            text-align: center;
+            border: 2px solid #333;
+            padding: 20px;
+            background: #0a0a0a;
+            box-shadow: 0 0 20px rgba(0, 255, 0, 0.1);
+        }
+
+        /* Поле ввода */
+        input[type="text"] {
+            background: #000;
+            border: 1px solid #33ff00;
+            color: #33ff00;
+            padding: 10px;
+            font-family: inherit;
+            font-size: 1.2rem;
+            width: 80%;
+            margin-bottom: 20px;
+            text-align: center;
+            outline: none;
+        }
+
+        input[type="text"]:focus {
+            box-shadow: 0 0 10px #33ff00;
+        }
+
+        /* Canvas Колесо */
+        #wheelCanvas {
+            border-radius: 50%;
+            border: 5px solid #444;
+            box-shadow: 0 0 15px #000;
+            margin-bottom: 20px;
+        }
+
+        /* Стрелка */
+        .pointer {
+            width: 0; 
+            height: 0; 
+            border-left: 15px solid transparent;
+            border-right: 15px solid transparent;
+            border-top: 25px solid #ff0000;
+            position: absolute;
+            left: 50%;
+            top: 135px; /* Подстройка под канвас */
+            transform: translateX(-50%);
+            z-index: 6;
+            filter: drop-shadow(0 0 5px red);
+        }
+
+        /* Кнопка */
+        button {
+            background: #111;
+            border: 2px solid #33ff00;
+            color: #33ff00;
+            padding: 15px 40px;
+            font-size: 1.5rem;
+            font-family: inherit;
+            cursor: pointer;
+            transition: 0.1s;
+            text-transform: uppercase;
+            font-weight: bold;
+        }
+
+        button:hover {
+            background: #33ff00;
+            color: #000;
+            box-shadow: 0 0 20px #33ff00;
+        }
+
+        button:disabled {
+            border-color: #555;
+            color: #555;
+            cursor: not-allowed;
+            background: #000;
+            box-shadow: none;
+        }
+
+        #status {
+            margin-top: 15px;
+            min-height: 1.2em;
+            font-size: 1.1rem;
+            color: #ffcc00;
+        }
+
+        /* Анимация мерцания текста */
+        @keyframes flicker {
+            0% { opacity: 0.9; }
+            5% { opacity: 0.5; }
+            10% { opacity: 0.9; }
+            15% { opacity: 0.1; }
+            20% { opacity: 0.9; }
+            100% { opacity: 0.9; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>Night Shift_Randomizer</h1>
+        
+        <input type="text" id="playerName" placeholder="ВВЕДИТЕ ИМЯ СОТРУДНИКА">
+        
+        <div style="position: relative;">
+            <div class="pointer"></div>
+            <canvas id="wheelCanvas" width="400" height="400"></canvas>
+        </div>
+
+        <button id="spinBtn" onclick="spinWheel()">ЗАПУСТИТЬ СИСТЕМУ</button>
+        
+        <div id="status">ОЖИДАНИЕ ВВОДА...</div>
+    </div>
+
+    <script>
+        // ================= КОНФИГУРАЦИЯ =================
+        // ВСТАВЬТЕ СЮДА ВАШ URL ИЗ GOOGLE APPS SCRIPT
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxOAXsHo0IBBCKhTeuMqtz7nNg3sYC_dWv44y-LW7k2NdENtjJdeKemssHwE5gTbD8Wnw/exec'; 
+        
+        // Список игр (Пресет маршрутной точки)
+        const segments = [
+            'Doom Eternal', 
+            'Hades', 
+            'Celeste', 
+            'Dark Souls', 
+            'Stardew Valley', 
+            'Among Us',
+            'Terraria',
+            'Hollow Knight'
+        ];
+
+        const colors = ['#1a1a1a', '#2b2b2b']; // Чередование цветов секторов
+        // ================================================
+
+        const canvas = document.getElementById('wheelCanvas');
+        const ctx = canvas.getContext('2d');
+        const spinBtn = document.getElementById('spinBtn');
+        const statusDiv = document.getElementById('status');
+        const nameInput = document.getElementById('playerName');
+
+        let currentAngle = 0;
+        let isSpinning = false;
+        
+        // Отрисовка колеса
+        function drawWheel() {
+            const centerX = canvas.width / 2;
+            const centerY = canvas.height / 2;
+            const radius = canvas.width / 2;
+            const step = (2 * Math.PI) / segments.length;
+
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            for (let i = 0; i < segments.length; i++) {
+                // Рисуем сектор
+                ctx.beginPath();
+                ctx.moveTo(centerX, centerY);
+                ctx.arc(centerX, centerY, radius, currentAngle + i * step, currentAngle + (i + 1) * step);
+                ctx.fillStyle = (i % 2 === 0) ? colors[0] : colors[1];
+                ctx.fill();
+                ctx.strokeStyle = '#33ff00';
+                ctx.lineWidth = 2;
+                ctx.stroke();
+
+                // Рисуем текст
+                ctx.save();
+                ctx.translate(centerX, centerY);
+                ctx.rotate(currentAngle + i * step + step / 2);
+                ctx.textAlign = "right";
+                ctx.fillStyle = "#33ff00";
+                ctx.font = "bold 16px Courier New";
+                ctx.fillText(segments[i], radius - 20, 5);
+                ctx.restore();
+            }
+        }
+
+        // Основная функция вращения
+        function spinWheel() {
+            const player = nameInput.value.trim();
+            
+            if (!player) {
+                alert("ОШИБКА: ИМЯ СОТРУДНИКА НЕ ОПОЗНАНО");
+                return;
+            }
+
+            if (isSpinning) return;
+            isSpinning = true;
+            spinBtn.disabled = true;
+            statusDiv.textContent = "ВЫПОЛНЯЕТСЯ ВЫЧИСЛЕНИЕ...";
+
+            // Параметры вращения
+            const spinDuration = 3000 + Math.random() * 2000; // от 3 до 5 секунд
+            const startVelocity = 0.5 + Math.random() * 0.5;
+            let velocity = startVelocity;
+            let startTime = null;
+
+            function animate(timestamp) {
+                if (!startTime) startTime = timestamp;
+                const progress = timestamp - startTime;
+
+                if (progress < spinDuration) {
+                    // Эффект замедления (Easin out)
+                    const timeRemaining = spinDuration - progress;
+                    // Чем меньше времени осталось, тем медленнее крутим
+                    velocity = (timeRemaining / spinDuration) * startVelocity; 
+                    
+                    currentAngle += velocity;
+                    drawWheel();
+                    requestAnimationFrame(animate);
+                } else {
+                    stopSpin();
+                }
+            }
+            requestAnimationFrame(animate);
+        }
+
+        function stopSpin() {
+            isSpinning = false;
+            spinBtn.disabled = false;
+
+            // Вычисляем победителя
+            const step = (2 * Math.PI) / segments.length;
+            // Нормализуем угол (0 - 2PI)
+            const normalizedAngle = currentAngle % (2 * Math.PI);
+            
+            // Поскольку стрелка сверху (270 градусов или 3/2 PI), нам нужно найти сектор, который там находится.
+            // Математика для Canvas (0 справа, идет по часовой):
+            // Индекс = (Длина - (ТекущийУгол / Шаг)) % Длина
+            // С небольшой поправкой на смещение стрелки
+            
+            // Простой метод: инвертируем угол вращения
+            let winningIndex = Math.floor((2 * Math.PI - normalizedAngle) / step);
+            // Стрелка указывает на 90 градусов "назад" от 0 (или 270 вперед). 
+            // Подгоняем индекс опытным путем для Canvas (обычно это -1/4 круга)
+            winningIndex = (winningIndex + segments.length - Math.floor(segments.length / 4)) % segments.length;
+
+            const resultGame = segments[winningIndex];
+            
+            statusDiv.textContent = `РЕЗУЛЬТАТ: ${resultGame}`;
+            statusDiv.style.textShadow = "0 0 10px red";
+            
+            // Отправка данных
+            sendData(resultGame);
+        }
+
+        function sendData(game) {
+            const player = nameInput.value.trim();
+            const loot = "Standard"; // Можно тоже рандомить, если нужно
+
+            const payload = {
+                player: player,
+                game: game,
+                loot: loot
+            };
+
+            statusDiv.textContent += " [ОТПРАВКА ДАННЫХ...]";
+
+            fetch(SCRIPT_URL, {
+                method: 'POST',
+                mode: 'no-cors', // ВАЖНО для Google Apps Script
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(payload)
+            })
+            .then(() => {
+                // В режиме no-cors мы не знаем статус ответа, но предполагаем успех
+                setTimeout(() => {
+                    statusDiv.textContent = `ПРОТОКОЛ СОХРАНЕН: ${game}`;
+                    statusDiv.style.color = "#33ff00";
+                    statusDiv.style.textShadow = "0 0 5px #33ff00";
+                }, 500);
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                statusDiv.textContent = "СБОЙ СОЕДИНЕНИЯ С СЕРВЕРОМ";
+                statusDiv.style.color = "red";
+            });
+        }
+
+        // Первая отрисовка
+        drawWheel();
+
+    </script>
+</body>
+</html>
