@@ -3,22 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Survival Randomizer v2.0</title>
+    <title>Survival Cycle</title>
     <style>
-        /* --- CORE STYLES (FNAF/RETRO) --- */
+        /* --- FNAF / INDUSTRIAL STYLE --- */
         :root {
-            --main-green: #33ff00;
-            --dim-green: #1a8000;
-            --bg-color: #050505;
-            --panel-bg: #0a0a0a;
-            --border-color: #333;
-            --text-shadow: 0 0 5px var(--main-green);
+            --neon-green: #33ff00;
+            --alert-red: #ff3333;
+            --plasma-blue: #00ccff;
+            --bg-dark: #080808;
+            --panel-bg: #111;
         }
 
         body {
-            background-color: var(--bg-color);
-            color: var(--main-green);
-            font-family: 'Courier New', Courier, monospace;
+            background-color: var(--bg-dark);
+            color: var(--neon-green);
+            font-family: 'Courier New', monospace;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -26,532 +25,453 @@
             margin: 0;
             padding: 20px;
             text-transform: uppercase;
-            text-shadow: var(--text-shadow);
         }
 
-        /* Scanlines Effect */
-        body::before {
-            content: " ";
-            display: block;
+        /* Эффект сетки монитора */
+        body::after {
+            content: "";
             position: fixed;
-            top: 0; left: 0; bottom: 0; right: 0;
-            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), 
-                        linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
-            z-index: 999;
-            background-size: 100% 2px, 3px 100%;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: repeating-linear-gradient(0deg, rgba(0,0,0,0.15) 0px, rgba(0,0,0,0.15) 1px, transparent 1px, transparent 2px);
             pointer-events: none;
+            z-index: 999;
         }
 
-        /* --- LAYOUT --- */
-        .top-bar {
-            width: 100%;
-            max-width: 1000px;
+        /* --- ВЫБОР ИГРОКА --- */
+        .player-bar {
             display: flex;
+            gap: 10px;
             flex-wrap: wrap;
             justify-content: center;
-            gap: 10px;
-            margin-bottom: 30px;
-            padding-bottom: 20px;
-            border-bottom: 1px solid var(--border-color);
-        }
-
-        .main-container {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
+            margin-bottom: 20px;
+            padding: 10px;
+            border-bottom: 2px solid #333;
             width: 100%;
-            max-width: 1200px;
-            gap: 20px;
+            max-width: 800px;
         }
 
-        .side-panel {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-            padding: 15px;
-            border: 1px solid var(--border-color);
-            background: var(--panel-bg);
-            min-height: 300px;
-        }
-
-        .center-panel {
-            flex: 2;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 20px;
-        }
-
-        /* --- COMPONENTS --- */
-        
-        /* Player Buttons */
-        .player-btn {
+        .btn-player {
             background: #000;
-            border: 1px solid var(--dim-green);
-            color: var(--dim-green);
-            padding: 10px 15px;
+            border: 1px solid #444;
+            color: #666;
+            padding: 8px 16px;
             cursor: pointer;
-            font-family: inherit;
-            font-weight: bold;
             transition: 0.2s;
         }
-
-        .player-btn:hover {
-            border-color: var(--main-green);
-            box-shadow: 0 0 10px var(--dim-green);
-        }
-
-        .player-btn.active {
-            background: var(--dim-green);
+        .btn-player:hover { border-color: var(--neon-green); color: #fff; }
+        .btn-player.active {
+            background: var(--neon-green);
             color: #000;
-            border-color: var(--main-green);
-            box-shadow: 0 0 15px var(--main-green);
+            box-shadow: 0 0 15px var(--neon-green);
+            border-color: var(--neon-green);
+            font-weight: bold;
         }
 
-        /* Route Select */
+        /* --- ГЛАВНАЯ ЗОНА (скрыта пока не выбран игрок) --- */
+        #gameArea {
+            display: none; /* Скрыто по умолчанию */
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+            max-width: 600px;
+        }
+
+        /* --- ВЫБОР МАРШРУТА --- */
+        .route-select-wrapper {
+            width: 100%;
+            margin-bottom: 20px;
+        }
         select {
+            width: 100%;
+            padding: 12px;
             background: #000;
-            color: var(--main-green);
-            border: 1px solid var(--main-green);
-            padding: 10px;
+            border: 2px solid var(--neon-green);
+            color: var(--neon-green);
             font-family: inherit;
             font-size: 1.1rem;
-            width: 100%;
-            max-width: 300px;
             cursor: pointer;
-            outline: none;
         }
 
-        option { background: #000; }
-        
-        /* Colored Optgroups */
-        optgroup[label="ЗЕЛЕНАЯ ВЕТКА"] { color: #00ff00; }
-        optgroup[label="КРАСНАЯ ВЕТКА"] { color: #ff0000; }
-        optgroup[label="СИНЯЯ ВЕТКА"] { color: #0088ff; }
+        /* --- ИНДИКАТОРЫ ЭТАПОВ --- */
+        .stage-indicator {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+            margin-bottom: 15px;
+            background: #000;
+            border: 1px solid #333;
+            padding: 5px;
+        }
+        .stage-step {
+            flex: 1;
+            text-align: center;
+            padding: 5px;
+            color: #444;
+            border: 1px solid transparent;
+            font-size: 0.9rem;
+            transition: 0.3s;
+        }
+        .stage-step.active {
+            color: #000;
+            font-weight: bold;
+        }
+        /* Цвета этапов */
+        .stage-step[data-type="EVENT"].active { background: var(--alert-red); box-shadow: 0 0 10px var(--alert-red); }
+        .stage-step[data-type="ITEM"].active { background: var(--plasma-blue); box-shadow: 0 0 10px var(--plasma-blue); }
+        .stage-step[data-type="GAME"].active { background: var(--neon-green); box-shadow: 0 0 10px var(--neon-green); }
 
-        /* Wheel */
-        .wheel-wrapper {
+        /* --- КОЛЕСО --- */
+        .wheel-container {
             position: relative;
             margin: 10px 0;
+            filter: drop-shadow(0 0 10px rgba(0, 255, 0, 0.2));
         }
-        
         canvas {
             border-radius: 50%;
-            border: 4px solid #333;
-            box-shadow: 0 0 20px #000;
+            border: 5px solid #222;
+            background: #000;
         }
-
         .pointer {
-            width: 0; height: 0;
-            border-left: 15px solid transparent;
-            border-right: 15px solid transparent;
-            border-top: 25px solid #ff0000;
             position: absolute;
-            left: 50%; top: -10px;
+            top: -15px; left: 50%;
             transform: translateX(-50%);
+            width: 0; height: 0;
+            border-left: 20px solid transparent;
+            border-right: 20px solid transparent;
+            border-top: 30px solid #fff;
             z-index: 10;
-            filter: drop-shadow(0 0 5px red);
         }
 
-        /* Spin Button */
-        .spin-btn {
+        /* --- УПРАВЛЕНИЕ --- */
+        .controls {
+            display: flex;
+            gap: 10px;
+            width: 100%;
+            margin-top: 20px;
+        }
+        .btn-action {
+            flex: 2;
+            padding: 15px;
+            font-size: 1.2rem;
             background: #111;
-            border: 2px solid var(--main-green);
-            color: var(--main-green);
-            padding: 15px 50px;
-            font-size: 1.5rem;
-            font-family: inherit;
+            border: 2px solid var(--neon-green);
+            color: var(--neon-green);
             cursor: pointer;
             text-transform: uppercase;
             font-weight: bold;
-            letter-spacing: 2px;
-            width: 100%;
-            max-width: 300px;
-            transition: 0.1s;
         }
-
-        .spin-btn:hover {
-            background: var(--main-green);
-            color: #000;
-            box-shadow: 0 0 20px var(--main-green);
-        }
-
-        .spin-btn:disabled {
-            border-color: #555;
-            color: #555;
-            cursor: not-allowed;
-            background: #000;
-            box-shadow: none;
-        }
-
-        /* Legend */
-        .legend-list {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-            text-align: left;
-            font-size: 0.9rem;
-        }
-
-        .legend-item {
-            display: flex;
-            justify-content: space-between;
-            padding: 5px 0;
-            border-bottom: 1px solid #222;
-        }
-
-        .legend-val { color: #fff; }
-
-        /* Modal & Manual Controls */
-        .manual-btn {
-            background: #222;
-            color: #aaa;
-            border: 1px solid #555;
-            padding: 10px;
-            width: 100%;
+        .btn-action:disabled { border-color: #444; color: #444; cursor: not-allowed; }
+        
+        .btn-skip {
+            flex: 1;
+            background: #220000;
+            border: 2px solid var(--alert-red);
+            color: var(--alert-red);
             cursor: pointer;
-            font-family: inherit;
+            font-size: 1rem;
         }
-        .manual-btn:hover { border-color: #fff; color: #fff; }
+        .btn-skip:hover { background: var(--alert-red); color: #000; }
 
-        #manualModal {
-            display: none;
-            position: fixed;
-            top: 50%; left: 50%;
-            transform: translate(-50%, -50%);
-            background: #000;
-            border: 2px solid var(--main-green);
-            padding: 20px;
-            z-index: 1000;
-            box-shadow: 0 0 50px rgba(0, 255, 0, 0.2);
-            width: 300px;
+        #logDisplay {
+            margin-top: 20px;
+            font-size: 0.9rem;
+            color: #888;
+            min-height: 20px;
         }
 
-        #status {
-            margin-top: 10px;
-            color: #ffcc00;
-            height: 20px;
-        }
-
-        /* Mobile Responsive */
-        @media (max-width: 800px) {
-            .main-container { flex-direction: column; }
-            .side-panel { width: 90%; order: 2; }
-            .center-panel { width: 100%; order: 1; }
-        }
     </style>
 </head>
 <body>
 
-    <div class="top-bar" id="playerContainer">
-        </div>
-
-    <div class="main-container">
-        
-        <div class="side-panel">
-            <h3>НАСТРОЙКИ</h3>
-            <button class="manual-btn" onclick="openModal()">🛠 РУЧНОЙ ПРЕСЕТ</button>
-            <div style="font-size: 0.8rem; color: #777; margin-top: 10px;">
-                Нажмите, чтобы принудительно выбрать список игр или ивентов для текущего хода.
-            </div>
-        </div>
-
-        <div class="center-panel">
-            <select id="routeSelect" onchange="updateWheelContent()">
-                <option value="" disabled selected>-- ВЫБЕРИТЕ ТОЧКУ --</option>
-                <optgroup label="ЗЕЛЕНАЯ ВЕТКА (🟢)" style="color: lightgreen;">
-                    <option value="G_A">Точка А</option>
-                    <option value="G_B">Точка Б</option>
-                    <option value="G_V">Точка В</option>
-                    <option value="G_G">Точка Г</option>
-                    <option value="G_D">Точка Д</option>
-                </optgroup>
-                <optgroup label="КРАСНАЯ ВЕТКА (🔴)" style="color: salmon;">
-                    <option value="R_1">Точка 1</option>
-                    <option value="R_2">Точка 2</option>
-                    <option value="R_3">Точка 3</option>
-                    <option value="R_4">Точка 4</option>
-                    <option value="R_5">Точка 5</option>
-                    <option value="R_6">Точка 6</option>
-                    <option value="R_7">Точка 7</option>
-                    <option value="R_8">Точка 8</option>
-                    <option value="R_9">Точка 9</option>
-                </optgroup>
-                <optgroup label="СИНЯЯ ВЕТКА (🔵)" style="color: lightblue;">
-                    <option value="B_X">Точка X</option>
-                    <option value="B_Y">Точка Y</option>
-                </optgroup>
-            </select>
-
-            <div class="wheel-wrapper">
-                <div class="pointer"></div>
-                <canvas id="wheelCanvas" width="400" height="400"></canvas>
-            </div>
-            
-            <div id="status">ОЖИДАНИЕ...</div>
-
-            <button class="spin-btn" id="spinBtn" onclick="spinWheel()">КРУТИТЬ</button>
-        </div>
-
-        <div class="side-panel">
-            <h3>ШАНСЫ DROP %</h3>
-            <ul class="legend-list" id="legendContainer">
-                </ul>
-        </div>
+    <div class="player-bar" id="playerBar">
+        <button class="btn-player" onclick="setPlayer('Manki', this)">Manki</button>
+        <button class="btn-player" onclick="setPlayer('Shoker', this)">Shoker</button>
+        <button class="btn-player" onclick="setPlayer('Marenyuk', this)">Marenyuk</button>
+        <button class="btn-player" onclick="setPlayer('Sunekoi', this)">Sunekoi</button>
+        <button class="btn-player" onclick="setPlayer('Smailgames', this)">Smailgames</button>
+        <button class="btn-player" onclick="setPlayer('Malekith', this)">Malekith</button>
+        <button class="btn-player" onclick="setPlayer('Cenoval', this)">Cenoval</button>
     </div>
 
-    <div id="manualModal">
-        <h3 style="margin-top: 0;">РУЧНОЙ ВВОД</h3>
+    <div id="gameArea">
         
-        <label>Игры:</label>
-        <select id="manualGames" style="margin-bottom: 10px;">
-            <option value="default">По умолчанию</option>
-            <option value="indie">Пакет Инди</option>
-            <option value="aaa">Пакет AAA</option>
-            <option value="retro">Пакет Ретро</option>
-        </select>
+        <div class="route-select-wrapper">
+            <select id="routeSelect" onchange="initRoute()">
+                <option value="" disabled selected>-- ВЫБЕРИТЕ ТОЧКУ МАРШРУТА --</option>
+                <optgroup label="ЗЕЛЕНАЯ ВЕТКА" style="color: lightgreen">
+                    <option value="Green_A">Точка A (Easy)</option>
+                    <option value="Green_B">Точка B (Easy)</option>
+                </optgroup>
+                <optgroup label="КРАСНАЯ ВЕТКА" style="color: salmon">
+                    <option value="Red_1">Точка 1 (Hard)</option>
+                    <option value="Red_2">Точка 2 (Hard)</option>
+                </optgroup>
+                <optgroup label="СИНЯЯ ВЕТКА" style="color: lightblue">
+                    <option value="Blue_X">Точка X (Special)</option>
+                </optgroup>
+            </select>
+        </div>
 
-        <label>Ивенты:</label>
-        <select id="manualEvents" style="margin-bottom: 10px;">
-            <option value="none">Нет</option>
-            <option value="hardcore">Хардкор</option>
-            <option value="lucky">Удача</option>
-        </select>
+        <div class="stage-indicator">
+            <div class="stage-step" id="step_0" data-type="EVENT">1. ИВЕНТ</div>
+            <div class="stage-step" id="step_1" data-type="ITEM">2. ПРЕДМЕТ</div>
+            <div class="stage-step" id="step_2" data-type="GAME">3. ИГРА</div>
+        </div>
 
-        <label>Предметы:</label>
-        <select id="manualItems" style="margin-bottom: 20px;">
-            <option value="standard">Стандарт</option>
-            <option value="rich">Богатое</option>
-        </select>
+        <div class="wheel-container">
+            <div class="pointer"></div>
+            <canvas id="wheelCanvas" width="350" height="350"></canvas>
+        </div>
 
-        <button class="manual-btn" style="border-color: var(--main-green);" onclick="applyManual()">ПРИМЕНИТЬ</button>
-        <button class="manual-btn" style="margin-top: 5px; border-color: red; color: red;" onclick="closeModal()">ОТМЕНА</button>
+        <div class="controls">
+            <button class="btn-skip" id="skipBtn" onclick="nextStage()">ПРОПУСТИТЬ</button>
+            <button class="btn-action" id="spinBtn" onclick="spinWheel()">КРУТИТЬ</button>
+        </div>
+
+        <div id="logDisplay">ОЖИДАНИЕ ВЫБОРА...</div>
     </div>
 
     <script>
-        // ================= КОНФИГУРАЦИЯ =================
-        const SCRIPT_URL = 'ЗДЕСЬ_ТВОЙ_URL'; // <--- ВСТАВИТЬ СЮДА ССЫЛКУ
+        // === КОНФИГУРАЦИЯ ===
+        const SCRIPT_URL = '/api/submit'; // ДЛЯ VERCEL
 
-        const players = [
-            "Manki", "Shoker", "Marenyuk", "Sunekoi", "Smailgames", "Malekith", "Cenoval"
-        ];
-
-        // Базовые списки (их можно расширять)
-        const gameLists = {
-            'default': ['Doom Eternal', 'Hades', 'Celeste', 'Hollow Knight', 'Terraria', 'Stardew Valley'],
-            'indie': ['Limbo', 'Inside', 'Cuphead', 'Undertale', 'Dead Cells'],
-            'aaa': ['Cyberpunk 2077', 'Elden Ring', 'RDR 2', 'Witcher 3', 'God of War'],
-            'retro': ['Mario', 'Sonic', 'Tetris', 'Pac-Man', 'Doom 1993']
+        // --- БАЗЫ ДАННЫХ ---
+        const DB = {
+            events: [
+                "Нет ивента", "Двойной лут", "Пропуск хода", 
+                "Хардкор (+50%)", "Удача", "Ловушка (-1 предмет)"
+            ],
+            items: [
+                "Аптечка", "Патроны", "Золотой ключ", 
+                "Карта", "Пустая бутылка", "Фонарик"
+            ],
+            games: {
+                // Если нужны разные игры для разных веток
+                'default': ['Doom', 'Hades', 'Celeste', 'Mario', 'Sonic'],
+                'indie': ['Hollow Knight', 'Cuphead', 'Limbo', 'Inside'],
+                'aaa': ['Elden Ring', 'Cyberpunk', 'RDR2', 'GTA V']
+            }
         };
 
-        // Цвета секторов
-        const colors = ['#111', '#222']; 
+        const STAGE_CONFIG = [
+            { type: 'EVENT', color: '#ff3333', data: DB.events },
+            { type: 'ITEM',  color: '#00ccff', data: DB.items },
+            { type: 'GAME',  color: '#33ff00', data: DB.games.default } // Заполнится динамически
+        ];
 
-        // ================= STATE =================
-        let selectedPlayer = null;
-        let currentSegments = [...gameLists['default']];
+        // === СОСТОЯНИЕ ===
+        let currentPlayer = null;
+        let currentRoute = null;
+        let currentStageIndex = 0; // 0, 1, 2
+        let currentSegments = [];
+        
         let isSpinning = false;
         let currentAngle = 0;
 
-        // ================= ИНИЦИАЛИЗАЦИЯ =================
-        const playerContainer = document.getElementById('playerContainer');
-        const legendContainer = document.getElementById('legendContainer');
+        // === ИНИЦИАЛИЗАЦИЯ ===
         const canvas = document.getElementById('wheelCanvas');
         const ctx = canvas.getContext('2d');
-        const statusDiv = document.getElementById('status');
-        const routeSelect = document.getElementById('routeSelect');
+        const spinBtn = document.getElementById('spinBtn');
+        const skipBtn = document.getElementById('skipBtn');
+        const logDisplay = document.getElementById('logDisplay');
+        const gameArea = document.getElementById('gameArea');
 
-        // Создание кнопок игроков
-        players.forEach(name => {
-            const btn = document.createElement('button');
-            btn.className = 'player-btn';
-            btn.textContent = name;
-            btn.onclick = () => selectPlayer(name, btn);
-            playerContainer.appendChild(btn);
-        });
-
-        // Функция выбора игрока
-        function selectPlayer(name, btnElement) {
-            selectedPlayer = name;
-            // Сброс классов
-            document.querySelectorAll('.player-btn').forEach(b => b.classList.remove('active'));
-            // Активный класс
-            btnElement.classList.add('active');
+        // Выбор игрока
+        function setPlayer(name, btn) {
+            currentPlayer = name;
+            // UI Update
+            document.querySelectorAll('.btn-player').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            
+            // Показываем игру
+            gameArea.style.display = 'flex';
+            logDisplay.textContent = `ИГРОК: ${name}. ВЫБЕРИТЕ МАРШРУТ.`;
+            
+            // Сбрасываем рулетку, пока не выбран маршрут
+            clearWheel();
+            spinBtn.disabled = true;
+            skipBtn.disabled = true;
         }
 
-        // Обновление контента колеса (заглушка логики: меняем список в зависимости от цвета ветки)
-        function updateWheelContent() {
-            const val = routeSelect.value;
+        // Выбор маршрута
+        function initRoute() {
+            const sel = document.getElementById('routeSelect');
+            currentRoute = sel.value;
             
-            // Простая логика для примера:
-            if (val.startsWith('G_')) { // Зеленая ветка
-                currentSegments = gameLists['indie'];
-            } else if (val.startsWith('R_')) { // Красная ветка
-                currentSegments = gameLists['aaa'];
-            } else if (val.startsWith('B_')) { // Синяя ветка
-                currentSegments = gameLists['retro'];
-            } else {
-                currentSegments = gameLists['default'];
+            // Определяем пул игр по цвету ветки (пример логики)
+            let gamePool = DB.games.default;
+            if (currentRoute.includes('Green')) gamePool = DB.games.indie;
+            if (currentRoute.includes('Red')) gamePool = DB.games.aaa;
+
+            // Обновляем конфиг 3-го этапа
+            STAGE_CONFIG[2].data = gamePool;
+
+            // Сброс на 1 этап
+            currentStageIndex = 0;
+            loadStage(0);
+        }
+
+        // Загрузка этапа (0, 1 или 2)
+        function loadStage(index) {
+            if (index >= 3) {
+                // Все этапы пройдены
+                logDisplay.textContent = "МАРШРУТ ЗАВЕРШЕН. ВЫБЕРИТЕ НОВУЮ ТОЧКУ.";
+                logDisplay.style.color = "white";
+                clearWheel();
+                spinBtn.disabled = true;
+                skipBtn.disabled = true;
+                document.querySelectorAll('.stage-step').forEach(s => s.classList.remove('active'));
+                return;
             }
 
-            drawWheel();
-            updateLegend();
+            currentStageIndex = index;
+            const config = STAGE_CONFIG[index];
+            currentSegments = config.data;
+
+            // Обновление UI
+            document.querySelectorAll('.stage-step').forEach(s => s.classList.remove('active'));
+            document.getElementById(`step_${index}`).classList.add('active');
+            
+            spinBtn.disabled = false;
+            spinBtn.textContent = `КРУТИТЬ (${config.type})`;
+            spinBtn.style.borderColor = config.color;
+            spinBtn.style.color = config.color;
+
+            skipBtn.disabled = false;
+
+            drawWheel(config.color);
         }
 
-        // ================= КОЛЕСО =================
-        function drawWheel() {
-            if (currentSegments.length === 0) return;
+        function nextStage() {
+            loadStage(currentStageIndex + 1);
+        }
 
-            const centerX = canvas.width / 2;
-            const centerY = canvas.height / 2;
-            const radius = canvas.width / 2 - 5; // -5 padding
-            const step = (2 * Math.PI) / currentSegments.length;
+        // === ЛОГИКА КОЛЕСА ===
+        function drawWheel(colorOverride) {
+            if (!currentSegments || currentSegments.length === 0) return;
+            const len = currentSegments.length;
+            const step = (2 * Math.PI) / len;
+            const cx = canvas.width / 2;
+            const cy = canvas.height / 2;
+            const r = cx - 10;
 
             ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-            for (let i = 0; i < currentSegments.length; i++) {
+            for (let i = 0; i < len; i++) {
                 ctx.beginPath();
-                ctx.moveTo(centerX, centerY);
-                ctx.arc(centerX, centerY, radius, currentAngle + i * step, currentAngle + (i + 1) * step);
-                ctx.fillStyle = (i % 2 === 0) ? colors[0] : colors[1];
+                ctx.moveTo(cx, cy);
+                ctx.arc(cx, cy, r, currentAngle + i*step, currentAngle + (i+1)*step);
+                
+                // Чередование цветов (Темный фон + Цветной акцент)
+                ctx.fillStyle = (i % 2 === 0) ? '#111' : '#1a1a1a';
                 ctx.fill();
-                ctx.strokeStyle = '#33ff00';
+                
+                ctx.strokeStyle = colorOverride || '#fff';
                 ctx.lineWidth = 2;
                 ctx.stroke();
 
-                // Текст
                 ctx.save();
-                ctx.translate(centerX, centerY);
-                ctx.rotate(currentAngle + i * step + step / 2);
+                ctx.translate(cx, cy);
+                ctx.rotate(currentAngle + i*step + step/2);
                 ctx.textAlign = "right";
-                ctx.fillStyle = "#33ff00";
+                ctx.fillStyle = colorOverride || '#fff';
                 ctx.font = "bold 14px Courier New";
-                // Обрезаем длинный текст
+                
                 let text = currentSegments[i];
-                if(text.length > 15) text = text.substring(0, 12) + '...';
-                ctx.fillText(text, radius - 20, 5);
+                if(text.length > 15) text = text.substring(0, 14) + '.';
+                ctx.fillText(text, r - 20, 5);
                 ctx.restore();
             }
         }
 
-        function updateLegend() {
-            legendContainer.innerHTML = '';
-            const total = currentSegments.length;
-            const chance = (100 / total).toFixed(1);
-
-            // Считаем уникальные вхождения (если вдруг секторов несколько одинаковых)
-            const counts = {};
-            currentSegments.forEach(x => { counts[x] = (counts[x] || 0) + 1; });
-
-            Object.keys(counts).forEach(key => {
-                const li = document.createElement('li');
-                li.className = 'legend-item';
-                const percent = (chance * counts[key]).toFixed(1); // Реальный шанс
-                li.innerHTML = `<span>${key}</span> <span class="legend-val">${percent}%</span>`;
-                legendContainer.appendChild(li);
-            });
+        function clearWheel() {
+            ctx.clearRect(0,0,canvas.width, canvas.height);
+            ctx.beginPath();
+            ctx.arc(175, 175, 165, 0, 2*Math.PI);
+            ctx.strokeStyle = '#333';
+            ctx.stroke();
         }
 
         function spinWheel() {
-            if (!selectedPlayer) {
-                alert("ОШИБКА: ИГРОК НЕ ВЫБРАН (Сверху)");
-                return;
-            }
-            if (!routeSelect.value) {
-                alert("ОШИБКА: ТОЧКА НЕ ВЫБРАНА");
-                return;
-            }
             if (isSpinning) return;
-
             isSpinning = true;
-            document.getElementById('spinBtn').disabled = true;
-            statusDiv.textContent = "ВЫЧИСЛЕНИЕ...";
+            spinBtn.disabled = true;
+            skipBtn.disabled = true;
 
-            const spinDuration = 3000 + Math.random() * 2000; 
-            const startVelocity = 0.5 + Math.random() * 0.5;
-            let velocity = startVelocity;
-            let startTime = null;
+            const config = STAGE_CONFIG[currentStageIndex];
+            const spinDuration = 3000 + Math.random() * 1000;
+            let start = null;
+            let velocity = 0.6 + Math.random() * 0.4;
 
-            function animate(timestamp) {
-                if (!startTime) startTime = timestamp;
-                const progress = timestamp - startTime;
+            function animate(time) {
+                if (!start) start = time;
+                const progress = time - start;
 
                 if (progress < spinDuration) {
-                    const timeRemaining = spinDuration - progress;
-                    velocity = (timeRemaining / spinDuration) * startVelocity; 
+                    velocity *= 0.99; // Затухание
                     currentAngle += velocity;
-                    drawWheel();
+                    drawWheel(config.color);
                     requestAnimationFrame(animate);
                 } else {
-                    stopSpin();
+                    isSpinning = false;
+                    finishSpin();
                 }
             }
             requestAnimationFrame(animate);
         }
 
-        function stopSpin() {
-            isSpinning = false;
-            document.getElementById('spinBtn').disabled = false;
-
-            const step = (2 * Math.PI) / currentSegments.length;
-            const normalizedAngle = currentAngle % (2 * Math.PI);
-            let winningIndex = Math.floor((2 * Math.PI - normalizedAngle) / step);
-            winningIndex = (winningIndex + currentSegments.length - Math.floor(currentSegments.length / 4)) % currentSegments.length;
-
-            const resultGame = currentSegments[winningIndex];
+        function finishSpin() {
+            const config = STAGE_CONFIG[currentStageIndex];
+            const len = currentSegments.length;
+            const step = (2 * Math.PI) / len;
+            const normAngle = currentAngle % (2 * Math.PI);
             
-            statusDiv.textContent = `ВЫПАЛО: ${resultGame}`;
-            statusDiv.style.textShadow = "0 0 10px red";
+            // Индекс победителя (с учетом стрелки сверху)
+            let idx = Math.floor((2 * Math.PI - normAngle) / step);
+            idx = (idx + len - Math.floor(len/4)) % len;
+
+            const result = currentSegments[idx];
             
-            sendData(resultGame);
+            logDisplay.textContent = `ВЫПАЛО: ${result} (СОХРАНЕНИЕ...)`;
+            logDisplay.style.color = config.color;
+
+            // ОТПРАВКА
+            sendData(config.type, result, () => {
+                // После успешной отправки идем дальше
+                setTimeout(() => {
+                    nextStage();
+                }, 1000);
+            });
         }
 
-        // ================= ОТПРАВКА ДАННЫХ =================
-        function sendData(game) {
-            const route = routeSelect.options[routeSelect.selectedIndex].text;
-            
-            const payload = {
-                player: selectedPlayer,
-                game: game,
-                loot: `Point: ${route}` // Можно добавить данные из Manual Presets
-            };
-
-            statusDiv.textContent += " [SENDING...]";
-
+        // === ОТПРАВКА ===
+        function sendData(type, value, callback) {
             fetch(SCRIPT_URL, {
                 method: 'POST',
-                mode: 'no-cors',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
+                body: JSON.stringify({
+                    player: currentPlayer,
+                    route: currentRoute,
+                    category: type,
+                    value: value
+                })
             })
-            .then(() => {
-                setTimeout(() => {
-                    statusDiv.textContent = "ДАННЫЕ ЗАПИСАНЫ В БД";
-                    statusDiv.style.color = "#33ff00";
-                }, 500);
+            .then(res => res.json())
+            .then(data => {
+                if(data.status === 'success') {
+                    logDisplay.textContent += " [OK]";
+                    callback();
+                } else {
+                    logDisplay.textContent = "ОШИБКА СЕРВЕРА";
+                    logDisplay.style.color = "red";
+                }
             })
-            .catch(err => console.error(err));
+            .catch(e => {
+                console.error(e);
+                logDisplay.textContent = "ОШИБКА СЕТИ (Vercel/GAS)";
+                logDisplay.style.color = "red";
+            });
         }
-
-        // ================= МОДАЛКА =================
-        const modal = document.getElementById('manualModal');
-        function openModal() { modal.style.display = 'block'; }
-        function closeModal() { modal.style.display = 'none'; }
-        
-        function applyManual() {
-            const gameType = document.getElementById('manualGames').value;
-            if (gameLists[gameType]) {
-                currentSegments = gameLists[gameType];
-                drawWheel();
-                updateLegend();
-            }
-            closeModal();
-        }
-
-        // Старт
-        drawWheel();
-        updateLegend();
 
     </script>
 </body>
