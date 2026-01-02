@@ -4,5 +4,16 @@
       "source": "/api/submit",
       "destination": "https://script.google.com/macros/s/AKfycby9zdfwQ-PKfAtJPyMNApD3kEhSFLdWZdgmEKLF3kExHVVePZIVNcwoGlvd21WrCePuHw/exec"
     }
+  ],
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=0, must-revalidate"
+        }
+      ]
+    }
   ]
 }
