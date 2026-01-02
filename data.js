@@ -100,12 +100,12 @@ const GAME_DATA = {
         // --- Специальные синие узлы ---
     
         // Промежуточная точка в столовой
-        '<X>': [
+        'X': [
             { name: 'Бонни', games: 'bonnieGames' }, // Синяя точка
             { name: 'Чика', games: 'chicaGames' }    // Желтая точка
         ],
         // Офис (Игрок)
-        '<Y>': [
+        'Y': [
             { name: 'Фредди', games: 'freddyGames' },
             { name: 'Бонни', games: 'bonnieGames' },
             { name: 'Чика', games: 'chicaGames' },
@@ -140,7 +140,7 @@ const GAME_DATA = {
             { name: 'Any% Speedrun', desc: 'Прохождение зелёной маршрутной точки без прохождения игры в ней', weight: 5 },
             { name: 'Вайп в таркове', desc: 'Выкини два надетых предмета.', weight: 5 },
             { name: 'Мать габена перевесила', desc: 'Откат на одну маршрутную точку назад.', weight: 4 }
-        ]
+        ],
         // Пресеты для ручного выбора
         presets: {
             'Только Везение': [
@@ -417,7 +417,7 @@ const GAME_DATA = {
             { name: 'Touhou 6: The Embodiment of Scarlet Devil', desc: 'Буллет-хелл. Экран в пулях, уворачивайся.', award: 'Бант Рейму', award_desc: 'Огромный красный бант жрицы храма Хакурей.', award_price: '1500', weight: 5.0 },
             { name: 'Touhou Chireiden ~ Subterranean Animism.', desc: 'Еще один ад из пуль, но под землей.', award: 'Третий глаз', award_desc: 'Глаз Койши. Читает мысли и усложняет жизнь.', award_price: '1500', weight: 5.0 },
             { name: 'Dark Souls 3', desc: 'Мрачная RPG. Перекаты, боссы и "You Died".', award: 'Эстус', award_desc: 'Желтая фляга. Глоток солнечного света среди боли и отчаяния.', award_price: '900', weight: 3.0 },
-        ],
+        ]
     },
 
     // Дополнительные пресеты игр для ручного выбора
