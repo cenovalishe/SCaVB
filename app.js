@@ -1,5 +1,6 @@
 // ==========================================
-// FNAF RANDOMIZER - Main Application Logic
+// SCaV RANDOMIZER - Main Application Logic
+// CCTV/Retro Style UI
 // ==========================================
 
 const SCRIPT_URL = '/api/submit';
@@ -19,7 +20,7 @@ const state = {
     isSending: false,
     currentSegments: [],
     lastResult: null,
-    gameResult: null, // Stores game result for status panel
+    gameResult: null,
     logHistory: []
 };
 
@@ -64,7 +65,9 @@ const elements = {
     infoEnemy: document.getElementById('infoEnemy'),
     infoMode: document.getElementById('infoMode'),
     notification: document.getElementById('notification'),
-    notificationText: document.getElementById('notificationText')
+    notificationText: document.getElementById('notificationText'),
+    currentTime: document.getElementById('currentTime'),
+    currentDate: document.getElementById('currentDate')
 };
 
 // Canvas context
@@ -87,6 +90,25 @@ function init() {
     attachEventListeners();
     loadState();
     drawEmptyWheel();
+    startClock();
+}
+
+function startClock() {
+    function updateClock() {
+        const now = new Date();
+        const time = now.toLocaleTimeString('ru-RU', { hour12: false });
+        const date = now.toLocaleDateString('ru-RU');
+
+        if (elements.currentTime) {
+            elements.currentTime.textContent = time;
+        }
+        if (elements.currentDate) {
+            elements.currentDate.textContent = date;
+        }
+    }
+
+    updateClock();
+    setInterval(updateClock, 1000);
 }
 
 function createPlayerButtons() {
@@ -106,7 +128,7 @@ function populateRouteSelect() {
 
     // Green points
     const greenGroup = document.createElement('optgroup');
-    greenGroup.label = '🟢 Green';
+    greenGroup.label = '🟢 Зелёные';
     GAME_DATA.routePoints.green.forEach(point => {
         const opt = document.createElement('option');
         opt.value = point;
@@ -117,7 +139,7 @@ function populateRouteSelect() {
 
     // Red points
     const redGroup = document.createElement('optgroup');
-    redGroup.label = '🔴 Red';
+    redGroup.label = '🔴 Красные';
     GAME_DATA.routePoints.red.forEach(point => {
         const opt = document.createElement('option');
         opt.value = point;
@@ -128,7 +150,7 @@ function populateRouteSelect() {
 
     // Blue points
     const blueGroup = document.createElement('optgroup');
-    blueGroup.label = '🔵 Blue';
+    blueGroup.label = '🔵 Синие';
     GAME_DATA.routePoints.blue.forEach(point => {
         const opt = document.createElement('option');
         opt.value = point;
@@ -222,18 +244,18 @@ function handlePlayerSelect(e) {
 
     e.target.classList.add('active');
     e.target.style.background = player.color;
-    e.target.style.color = '#000';
+    e.target.style.color = '#0d0f10';
 
     // Show controls
     elements.controlsRow.style.display = 'flex';
     elements.gameArea.style.display = 'grid';
-    elements.resetBtn.style.display = 'inline-block';
+    elements.resetBtn.style.display = 'flex';
 
     // Update info
     elements.infoPlayer.textContent = player.name;
 
     saveState();
-    showNotification(`Player: ${player.name}`);
+    showNotification(`Оператор: ${player.name}`);
 }
 
 function handleRouteSelect(e) {
@@ -250,7 +272,7 @@ function handleRouteSelect(e) {
     }
 
     state.route = point;
-    state.isAutoMode = true; // Reset to auto mode on new route
+    state.isAutoMode = true;
     state.rerollUsed = false;
 
     // Randomize enemy
@@ -259,7 +281,7 @@ function handleRouteSelect(e) {
         const randomIndex = Math.floor(Math.random() * enemies.length);
         state.currentEnemy = enemies[randomIndex];
         elements.enemyName.textContent = state.currentEnemy.name;
-        elements.enemyDisplay.style.display = 'block';
+        elements.enemyDisplay.style.display = 'flex';
     }
 
     // Set first stage
@@ -270,14 +292,14 @@ function handleRouteSelect(e) {
     // Update info
     elements.infoPoint.textContent = point;
     elements.infoEnemy.textContent = state.currentEnemy ? state.currentEnemy.name : '-';
-    elements.infoMode.textContent = 'Auto';
+    elements.infoMode.textContent = 'Авто';
 
     // Hide game status panel
     elements.gameStatusPanel.style.display = 'none';
-    elements.spinBtn.style.display = 'inline-block';
+    elements.spinBtn.style.display = 'inline-flex';
 
     saveState();
-    showNotification(`Route: ${point} | Enemy: ${state.currentEnemy?.name || 'None'}`);
+    showNotification(`Точка: ${point} | Враг: ${state.currentEnemy?.name || 'Нет'}`);
 }
 
 function handleStageSelect(stage) {
@@ -285,7 +307,7 @@ function handleStageSelect(stage) {
 
     // Manual stage selection disables auto mode
     state.isAutoMode = false;
-    elements.infoMode.textContent = 'Manual';
+    elements.infoMode.textContent = 'Ручной';
 
     state.stage = stage;
     updateStageUI();
@@ -294,7 +316,7 @@ function handleStageSelect(stage) {
     // Reset game status panel if switching away from game
     if (stage !== 'game') {
         elements.gameStatusPanel.style.display = 'none';
-        elements.spinBtn.style.display = 'inline-block';
+        elements.spinBtn.style.display = 'inline-flex';
     }
 
     saveState();
@@ -302,7 +324,7 @@ function handleStageSelect(stage) {
 
 function handleApplyPresets() {
     state.isAutoMode = false;
-    elements.infoMode.textContent = 'Manual';
+    elements.infoMode.textContent = 'Ручной';
 
     const eventPreset = elements.eventPreset.value;
     const itemPreset = elements.itemPreset.value;
@@ -311,7 +333,7 @@ function handleApplyPresets() {
     // Load preset based on current stage
     loadStageData(eventPreset, itemPreset, gamePreset);
 
-    showNotification('Presets applied');
+    showNotification('Пресеты применены');
     saveState();
 }
 
@@ -320,6 +342,9 @@ async function handleSpin() {
 
     state.isSpinning = true;
     elements.spinBtn.disabled = true;
+
+    // Add spinning class for LED animation
+    document.querySelector('.wheel-frame').classList.add('spinning');
 
     // Weighted random selection
     const result = weightedRandom(state.currentSegments);
@@ -340,13 +365,12 @@ async function handleSpin() {
     const segmentCenterAngle = (segmentCenterWeight / totalWeight) * 360;
 
     // Pointer is at top (270 degrees in canvas coordinates)
-    // We need to rotate so the segment center aligns with the pointer
     const pointerAngle = 270;
     const currentRotationDegrees = (wheelRotation * 180 / Math.PI) % 360;
 
     // Calculate how much to rotate
     const targetAngle = pointerAngle - segmentCenterAngle;
-    const additionalSpins = 5 + Math.floor(Math.random() * 3); // 5-7 full rotations
+    const additionalSpins = 5 + Math.floor(Math.random() * 3);
     targetRotation = wheelRotation + (additionalSpins * Math.PI * 2) + ((targetAngle - currentRotationDegrees) * Math.PI / 180);
 
     // Start animation
@@ -356,7 +380,7 @@ async function handleSpin() {
 function animateWheel() {
     const startRotation = wheelRotation;
     const totalRotation = targetRotation - startRotation;
-    const duration = 5000; // 5 seconds
+    const duration = 5000;
     const startTime = performance.now();
 
     function animate(currentTime) {
@@ -374,6 +398,7 @@ function animateWheel() {
         } else {
             // Animation complete
             state.isSpinning = false;
+            document.querySelector('.wheel-frame').classList.remove('spinning');
             onSpinComplete();
         }
     }
@@ -431,9 +456,9 @@ async function handleComplete() {
     if (state.isSending) return;
 
     await sendData(state.gameResult, 'Пройдено');
-    addToLog('action', { name: 'COMPLETE', desc: state.gameResult.name });
+    addToLog('action', { name: 'ПРОЙДЕНО', desc: state.gameResult.name });
 
-    showNotification('Award granted!');
+    showNotification('Награда получена!');
     resetAfterGame();
 }
 
@@ -442,7 +467,7 @@ async function handleReroll() {
 
     // Send reroll status for current game
     await sendData(state.gameResult, 'Реролл');
-    addToLog('action', { name: 'REROLL', desc: state.gameResult.name });
+    addToLog('action', { name: 'РЕРОЛЛ', desc: state.gameResult.name });
 
     // Mark reroll as used
     state.rerollUsed = true;
@@ -450,7 +475,7 @@ async function handleReroll() {
 
     // Spin again
     elements.gameStatusPanel.style.display = 'none';
-    elements.spinBtn.style.display = 'inline-block';
+    elements.spinBtn.style.display = 'inline-flex';
     elements.spinBtn.disabled = false;
 
     // Trigger spin
@@ -463,9 +488,9 @@ async function handleDrop() {
     if (state.isSending) return;
 
     await sendData(state.gameResult, 'Дроп');
-    addToLog('action', { name: 'DROP', desc: state.gameResult.name });
+    addToLog('action', { name: 'ДРОП', desc: state.gameResult.name });
 
-    showNotification('Game dropped');
+    showNotification('Игра сброшена');
     resetAfterGame();
 }
 
@@ -502,13 +527,13 @@ function handleReset() {
     elements.routeSelect.value = '';
     elements.enemyDisplay.style.display = 'none';
     elements.gameStatusPanel.style.display = 'none';
-    elements.spinBtn.style.display = 'inline-block';
+    elements.spinBtn.style.display = 'inline-flex';
     elements.resultDisplay.style.display = 'none';
 
     drawEmptyWheel();
     updateLog();
 
-    showNotification('Session reset');
+    showNotification('Сессия сброшена');
 }
 
 function resetAfterGame() {
@@ -521,7 +546,7 @@ function resetAfterGame() {
     elements.routeSelect.value = '';
     elements.enemyDisplay.style.display = 'none';
     elements.gameStatusPanel.style.display = 'none';
-    elements.spinBtn.style.display = 'inline-block';
+    elements.spinBtn.style.display = 'inline-flex';
     elements.resultDisplay.style.display = 'none';
 
     updateStageUI();
@@ -610,7 +635,7 @@ function updateRerollButton() {
 
 function updateLegend(segments) {
     if (segments.length === 0) {
-        elements.legendContainer.innerHTML = '<p class="legend-empty">Select a stage to view chances</p>';
+        elements.legendContainer.innerHTML = '<p class="legend-empty">Выберите этап для просмотра</p>';
         return;
     }
 
@@ -638,9 +663,9 @@ function displayResult(result) {
 
     let extra = '';
     if (result.price) {
-        extra = `Price: ${result.price}`;
+        extra = `Цена: ${result.price}`;
     } else if (result.award) {
-        extra = `Award: ${result.award} (${result.award_price})`;
+        extra = `Награда: ${result.award} (${result.award_price})`;
     }
     elements.resultExtra.textContent = extra;
 
@@ -652,7 +677,7 @@ function addToLog(type, result) {
         type,
         value: result.name,
         chance: result.weight ? calculateChance(result) : null,
-        time: new Date().toLocaleTimeString()
+        time: new Date().toLocaleTimeString('ru-RU')
     };
 
     state.logHistory.unshift(entry);
@@ -662,14 +687,21 @@ function addToLog(type, result) {
 
 function updateLog() {
     if (state.logHistory.length === 0) {
-        elements.logContainer.innerHTML = '<div class="log-empty">No spins yet</div>';
+        elements.logContainer.innerHTML = '<div class="log-empty">Нет записей</div>';
         return;
     }
+
+    const stageLabels = {
+        'event': 'СОБЫТИЕ',
+        'item': 'ПРЕДМЕТ',
+        'game': 'ИГРА',
+        'action': 'ДЕЙСТВИЕ'
+    };
 
     let html = '';
     state.logHistory.forEach(entry => {
         const typeClass = entry.type === 'action' ? 'action' : entry.type;
-        const stageLabel = entry.type === 'action' ? 'ACTION' : entry.type.toUpperCase();
+        const stageLabel = stageLabels[entry.type] || entry.type.toUpperCase();
         const chanceText = entry.chance ? `<span class="log-chance">${entry.chance}%</span>` : '';
 
         html += `
@@ -689,7 +721,7 @@ function clearLog() {
     state.logHistory = [];
     updateLog();
     saveState();
-    showNotification('Log cleared');
+    showNotification('Журнал очищен');
 }
 
 function calculateChance(result) {
@@ -698,44 +730,71 @@ function calculateChance(result) {
 }
 
 // ==========================================
-// WHEEL DRAWING
+// WHEEL DRAWING - Enhanced Visual
 // ==========================================
 
 function drawEmptyWheel() {
-    ctx.clearRect(0, 0, elements.wheelCanvas.width, elements.wheelCanvas.height);
+    const canvas = elements.wheelCanvas;
+    const centerX = canvas.width / 2;
+    const centerY = canvas.height / 2;
+    const radius = Math.min(centerX, centerY) - 10;
 
-    ctx.save();
-    ctx.translate(wheelRadius, wheelRadius);
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    // Draw empty wheel background
+    // Draw background
     ctx.beginPath();
-    ctx.arc(0, 0, wheelRadius - 10, 0, Math.PI * 2);
-    ctx.fillStyle = '#1a1a1a';
+    ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
+    ctx.fillStyle = '#141618';
     ctx.fill();
 
-    // Draw "SELECT ROUTE" text
-    ctx.fillStyle = '#666';
-    ctx.font = '20px "Special Elite"';
+    // Draw grid lines
+    ctx.strokeStyle = '#242729';
+    ctx.lineWidth = 1;
+
+    // Radial lines
+    for (let i = 0; i < 12; i++) {
+        const angle = (i / 12) * Math.PI * 2;
+        ctx.beginPath();
+        ctx.moveTo(centerX, centerY);
+        ctx.lineTo(
+            centerX + Math.cos(angle) * radius,
+            centerY + Math.sin(angle) * radius
+        );
+        ctx.stroke();
+    }
+
+    // Concentric circles
+    for (let r = radius * 0.33; r < radius; r += radius * 0.33) {
+        ctx.beginPath();
+        ctx.arc(centerX, centerY, r, 0, Math.PI * 2);
+        ctx.stroke();
+    }
+
+    // Draw "ВЫБЕРИТЕ ТОЧКУ" text
+    ctx.fillStyle = '#5a6062';
+    ctx.font = '16px "8BitOperator", "Courier New", monospace';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
-    ctx.fillText('SELECT ROUTE', 0, -10);
-    ctx.fillText('TO START', 0, 15);
-
-    ctx.restore();
+    ctx.fillText('ВЫБЕРИТЕ', centerX, centerY - 12);
+    ctx.fillText('ТОЧКУ', centerX, centerY + 12);
 }
 
 function drawWheel() {
     const segments = state.currentSegments;
+    const canvas = elements.wheelCanvas;
+    const centerX = canvas.width / 2;
+    const centerY = canvas.height / 2;
+    const radius = Math.min(centerX, centerY) - 10;
 
     if (segments.length === 0) {
         drawEmptyWheel();
         return;
     }
 
-    ctx.clearRect(0, 0, elements.wheelCanvas.width, elements.wheelCanvas.height);
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
 
     ctx.save();
-    ctx.translate(wheelRadius, wheelRadius);
+    ctx.translate(centerX, centerY);
     ctx.rotate(wheelRotation);
 
     const totalWeight = segments.reduce((sum, s) => sum + s.weight, 0);
@@ -745,44 +804,66 @@ function drawWheel() {
 
     segments.forEach((segment, index) => {
         const sliceAngle = (segment.weight / totalWeight) * Math.PI * 2;
+        const midAngle = startAngle + sliceAngle / 2;
 
         // Draw segment
         ctx.beginPath();
         ctx.moveTo(0, 0);
-        ctx.arc(0, 0, wheelRadius - 10, startAngle, startAngle + sliceAngle);
+        ctx.arc(0, 0, radius, startAngle, startAngle + sliceAngle);
         ctx.closePath();
 
-        ctx.fillStyle = colors[index];
+        // Gradient fill for depth
+        const gradient = ctx.createRadialGradient(0, 0, 0, 0, 0, radius);
+        const baseColor = colors[index];
+        gradient.addColorStop(0, lightenColor(baseColor, 20));
+        gradient.addColorStop(0.5, baseColor);
+        gradient.addColorStop(1, darkenColor(baseColor, 20));
+
+        ctx.fillStyle = gradient;
         ctx.fill();
 
-        ctx.strokeStyle = '#000';
+        // Segment border
+        ctx.strokeStyle = '#0d0f10';
         ctx.lineWidth = 2;
+        ctx.stroke();
+
+        // Inner accent line
+        ctx.beginPath();
+        ctx.arc(0, 0, radius * 0.85, startAngle + 0.02, startAngle + sliceAngle - 0.02);
+        ctx.strokeStyle = 'rgba(255,255,255,0.1)';
+        ctx.lineWidth = 1;
         ctx.stroke();
 
         // Draw text
         ctx.save();
-        ctx.rotate(startAngle + sliceAngle / 2);
+        ctx.rotate(midAngle);
         ctx.textAlign = 'right';
         ctx.textBaseline = 'middle';
 
-        // Only show text if segment is wide enough
         const sliceAngleDegrees = (sliceAngle * 180) / Math.PI;
-        if (sliceAngleDegrees > 10) {
-            ctx.fillStyle = '#000';
-            ctx.font = sliceAngleDegrees > 20 ? '12px "Special Elite"' : '10px "Special Elite"';
 
-            // Truncate text if needed
+        if (sliceAngleDegrees > 8) {
+            // Text shadow for readability
+            ctx.fillStyle = '#000';
+            ctx.font = sliceAngleDegrees > 18 ? '11px "8BitOperator", monospace' : '9px "8BitOperator", monospace';
+
             let text = segment.name;
-            if (text.length > 15 && sliceAngleDegrees < 30) {
-                text = text.substring(0, 12) + '...';
+            const maxLength = sliceAngleDegrees > 25 ? 14 : 10;
+            if (text.length > maxLength) {
+                text = text.substring(0, maxLength - 2) + '..';
             }
 
-            ctx.fillText(text, wheelRadius - 25, 0);
-        } else {
+            // Shadow
+            ctx.fillText(text, radius - 18, 1);
+
+            // Main text
+            ctx.fillStyle = '#fff';
+            ctx.fillText(text, radius - 19, 0);
+        } else if (sliceAngleDegrees > 4) {
             // Show index for narrow segments
-            ctx.fillStyle = '#000';
-            ctx.font = '10px "Special Elite"';
-            ctx.fillText((index + 1).toString(), wheelRadius - 20, 0);
+            ctx.fillStyle = '#fff';
+            ctx.font = '9px "8BitOperator", monospace';
+            ctx.fillText((index + 1).toString(), radius - 15, 0);
         }
 
         ctx.restore();
@@ -790,14 +871,24 @@ function drawWheel() {
         startAngle += sliceAngle;
     });
 
+    // Draw center overlay gradient
+    const centerGradient = ctx.createRadialGradient(0, 0, 0, 0, 0, radius * 0.15);
+    centerGradient.addColorStop(0, 'rgba(13, 15, 16, 0.9)');
+    centerGradient.addColorStop(1, 'rgba(13, 15, 16, 0)');
+    ctx.beginPath();
+    ctx.arc(0, 0, radius * 0.2, 0, Math.PI * 2);
+    ctx.fillStyle = centerGradient;
+    ctx.fill();
+
     ctx.restore();
 }
 
 function generateColors(count) {
+    // Muted, industrial color palette
     const baseColors = [
-        '#ff6b1a', '#ffd700', '#32cd32', '#1e90ff', '#9b59b6',
-        '#e74c3c', '#3498db', '#2ecc71', '#f39c12', '#8e44ad',
-        '#16a085', '#d35400', '#c0392b', '#27ae60', '#2980b9'
+        '#6b8b8b', '#8b7b6b', '#7b8b6b', '#6b7b8b', '#8b6b7b',
+        '#7b6b8b', '#8b8b6b', '#6b8b7b', '#8b6b6b', '#6b6b8b',
+        '#7b8b8b', '#8b7b7b', '#6b7b7b', '#7b6b7b', '#8b8b8b'
     ];
 
     const colors = [];
@@ -805,6 +896,24 @@ function generateColors(count) {
         colors.push(baseColors[i % baseColors.length]);
     }
     return colors;
+}
+
+function lightenColor(hex, percent) {
+    const num = parseInt(hex.replace('#', ''), 16);
+    const amt = Math.round(2.55 * percent);
+    const R = Math.min(255, (num >> 16) + amt);
+    const G = Math.min(255, ((num >> 8) & 0x00FF) + amt);
+    const B = Math.min(255, (num & 0x0000FF) + amt);
+    return `rgb(${R}, ${G}, ${B})`;
+}
+
+function darkenColor(hex, percent) {
+    const num = parseInt(hex.replace('#', ''), 16);
+    const amt = Math.round(2.55 * percent);
+    const R = Math.max(0, (num >> 16) - amt);
+    const G = Math.max(0, ((num >> 8) & 0x00FF) - amt);
+    const B = Math.max(0, (num & 0x0000FF) - amt);
+    return `rgb(${R}, ${G}, ${B})`;
 }
 
 // ==========================================
@@ -835,8 +944,8 @@ async function sendData(result, status = 'Назначено') {
     updateSpinButton();
 
     let data = {
-        player: state.player?.name || 'Unknown',
-        point: state.route || 'Unknown'
+        player: state.player?.name || 'Неизвестно',
+        point: state.route || 'Неизвестно'
     };
 
     switch (state.stage) {
@@ -871,13 +980,13 @@ async function sendData(result, status = 'Назначено') {
         });
 
         if (response.ok) {
-            showMessage('Data sent successfully!');
+            showMessage('Данные отправлены');
         } else {
-            showMessage('Error sending data', true);
+            showMessage('Ошибка отправки', true);
         }
     } catch (error) {
         console.error('Send error:', error);
-        showMessage('Network error', true);
+        showMessage('Ошибка сети', true);
     }
 
     state.isSending = false;
@@ -901,8 +1010,8 @@ function showNotification(text) {
 function showMessage(text, isError = false) {
     elements.messageText.textContent = text;
     elements.messageDisplay.style.display = 'block';
-    elements.messageDisplay.style.background = isError ? 'var(--accent-red)' : 'var(--accent-green)';
-    elements.messageDisplay.style.borderColor = isError ? '#ff0000' : '#32cd32';
+    elements.messageDisplay.style.background = isError ? '#8b5a5a' : '#6b8b6b';
+    elements.messageDisplay.style.borderColor = isError ? '#a06060' : '#7a9a7a';
 
     setTimeout(() => {
         elements.messageDisplay.style.display = 'none';
@@ -943,11 +1052,11 @@ function loadState() {
             if (playerBtn) {
                 playerBtn.classList.add('active');
                 playerBtn.style.background = data.player.color;
-                playerBtn.style.color = '#000';
+                playerBtn.style.color = '#0d0f10';
             }
             elements.controlsRow.style.display = 'flex';
             elements.gameArea.style.display = 'grid';
-            elements.resetBtn.style.display = 'inline-block';
+            elements.resetBtn.style.display = 'flex';
             elements.infoPlayer.textContent = data.player.name;
         }
 
@@ -962,7 +1071,7 @@ function loadState() {
         if (data.currentEnemy) {
             state.currentEnemy = data.currentEnemy;
             elements.enemyName.textContent = data.currentEnemy.name;
-            elements.enemyDisplay.style.display = 'block';
+            elements.enemyDisplay.style.display = 'flex';
             elements.infoEnemy.textContent = data.currentEnemy.name;
         }
 
@@ -975,7 +1084,7 @@ function loadState() {
 
         // Restore auto mode
         state.isAutoMode = data.isAutoMode ?? true;
-        elements.infoMode.textContent = state.isAutoMode ? 'Auto' : 'Manual';
+        elements.infoMode.textContent = state.isAutoMode ? 'Авто' : 'Ручной';
 
         // Restore reroll
         state.rerollUsed = data.rerollUsed ?? false;
@@ -995,7 +1104,7 @@ function loadState() {
             updateLog();
         }
 
-        showNotification('Session restored');
+        showNotification('Сессия восстановлена');
 
     } catch (error) {
         console.error('Error loading state:', error);
