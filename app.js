@@ -397,7 +397,7 @@ function animateWheel() {
             animationFrame = requestAnimationFrame(animate);
         } else {
             // Animation complete
-            state.isSpinning = false;
+            // state.isSpinning = false; // <--- УДАЛИТЕ ИЛИ ЗАКОММЕНТИРУЙТЕ ЭТУ СТРОКУ
             document.querySelector('.wheel-frame').classList.remove('spinning');
             onSpinComplete();
         }
@@ -425,7 +425,10 @@ async function onSpinComplete() {
         elements.currentGameDisplay.textContent = result.name;
         elements.spinBtn.style.display = 'none';
         elements.gameStatusPanel.style.display = 'block';
+        
+        state.isSpinning = false; // <--- ДОБАВЛЕНО: Разблокируем здесь
         updateRerollButton();
+        
     } else if (state.isAutoMode) {
         // Auto-advance to next stage
         setTimeout(() => {
@@ -437,6 +440,9 @@ async function onSpinComplete() {
             updateStageUI();
             loadStageData();
             elements.resultDisplay.style.display = 'none';
+            
+            state.isSpinning = false; // <--- ДОБАВЛЕНО: Разблокируем только ПОСЛЕ смены этапа
+            updateSpinButton();       // <--- Обновляем состояние кнопки
         }, 2000);
     } else {
         // Manual mode: clear wheel after event/item
@@ -445,6 +451,9 @@ async function onSpinComplete() {
             state.currentSegments = [];
             updateLegend([]);
             elements.resultDisplay.style.display = 'none';
+            updateSpinButton();
+            
+            state.isSpinning = false; // <--- ДОБАВЛЕНО: Разблокируем для ручного режима
             updateSpinButton();
         }, 2000);
     }
@@ -642,12 +651,26 @@ function updateLegend(segments) {
     const totalWeight = segments.reduce((sum, s) => sum + s.weight, 0);
     const colors = generateColors(segments.length);
 
+    // 1. Создаем временный массив объектов, связывая сегмент с его цветом
+    // Это нужно, чтобы при сортировке цвета не перепутались и совпадали с колесом
+    const sortedData = segments.map((segment, index) => ({
+        segment: segment,
+        color: colors[index]
+    }));
+
+    // 2. Сортируем этот массив по весу (weight) от большего к меньшему
+    sortedData.sort((a, b) => b.segment.weight - a.segment.weight);
+
     let html = '';
-    segments.forEach((segment, index) => {
+    // 3. Выводим уже отсортированные данные
+    sortedData.forEach((item) => {
+        const segment = item.segment;
+        const color = item.color; // Используем сохраненный цвет
         const chance = ((segment.weight / totalWeight) * 100).toFixed(1);
+        
         html += `
             <div class="legend-item">
-                <span class="legend-color" style="background: ${colors[index]}"></span>
+                <span class="legend-color" style="background: ${color}"></span>
                 <span class="legend-name" title="${segment.name}">${segment.name}</span>
                 <span class="legend-chance">${chance}%</span>
             </div>
